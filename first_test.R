@@ -2,8 +2,10 @@
 library(deducorrect)
 library(tidyverse)
 
-# quick look
+# data load - make it automate from googleforms
 df <- read_csv(file = "surv_20190513.csv")
+
+# quick look
 summary(df)
 table(df$`Czy studiujesz na Wydziale Zarządzania UŁ?`)
 df <- df %>% filter(`Czy studiujesz na Wydziale Zarządzania UŁ?` == "Tak",

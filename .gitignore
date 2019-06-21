@@ -2,4 +2,6 @@
 .Rhistory
 .RData
 .Ruserdata
+first_test.R
 surv_20190513.csv
+.httr-oauth
