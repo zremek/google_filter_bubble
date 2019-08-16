@@ -63,6 +63,6 @@ url_first_clean <- url_summary %>%
 
 # url_last_clean$count %>% sum()
 
-write_csv(url_first_clean, "url_first_clean.csv")
+# write_csv(url_first_clean, "url_first_clean.csv")
 
 
