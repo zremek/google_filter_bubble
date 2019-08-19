@@ -113,9 +113,47 @@ df_long_clean <- df_long_clean %>%
   filter(grepl("http://predykator.pl/metody-badawcze.html",
                clean_no_url) == FALSE)
 
-df_long_clean %>% 
+top_domains <- df_long_clean %>% 
   group_by(url_top_domain) %>% 
   count() %>% 
-  arrange(-n) %>% 
-  print(n = Inf) %>% 
-  write_csv("top_domain_count.csv")
+  arrange(url_top_domain) 
+top_domains$letter_top_domain <- LETTERS[1:length(top_domains$url_top_domain)]
+top_domains$letter_top_domain[27:30] <- c("Ł","Ó", "Ż", "Ź") # to have 30 distinct letters
+
+df_long_clean <- left_join(x = df_long_clean,
+          y = top_domains,
+          by = "url_top_domain")
+
+df_long_clean %>% select(id,
+                         browser_mode,
+                         search_order_short,
+                         letter_top_domain,
+                         clean_no_url) %>% 
+  filter(id %in% c("reportable_crayfish", "bioclimatic_whapuku")) %>% 
+  arrange(id, browser_mode, search_order_short)
+
+# there are ids with the same top domain pasted multiple times for one browser mode  
+# ex. "bioclimatic_whapuku"
+# "reportable_crayfish" looks ok - browser_mode * search_order is distinct
+
+## check distinct domains in a results by mode
+
+conc_letter_top_domain <- df_long_clean %>% select(id,
+                         browser_mode,
+                         search_order_short,
+                         letter_top_domain,
+                         clean_no_url) %>% 
+  arrange(id, browser_mode, search_order_short) %>% 
+  group_by(id, browser_mode) %>% 
+  summarise(paste = paste0(letter_top_domain, collapse = "")) %>% 
+  spread(key = browser_mode, value = paste)
+
+
+conc_letter_top_domain$distinct_chars_incognito <- sapply(
+  conc_letter_top_domain$incognito,
+  function(x) sum(!!str_count(x, top_domains$letter_top_domain)))
+
+conc_letter_top_domain$distinct_chars_normal <- sapply(
+  conc_letter_top_domain$normal,
+  function(x) sum(!!str_count(x, top_domains$letter_top_domain)))
+
