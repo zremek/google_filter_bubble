@@ -157,3 +157,13 @@ conc_letter_top_domain$distinct_chars_normal <- sapply(
   conc_letter_top_domain$normal,
   function(x) sum(!!str_count(x, top_domains$letter_top_domain)))
 
+# different browser mode, the same results (domains in order)?
+conc_letter_top_domain <- conc_letter_top_domain %>% 
+  mutate(incognito_equal_to_normal = incognito == normal)
+table(conc_letter_top_domain$incognito_equal_to_normal) # 33 TRUE
+
+### delete ?
+conc_letter_top_domain %>% 
+  filter(distinct_chars_incognito < 3 |
+           distinct_chars_normal < 3)
+
