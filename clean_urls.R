@@ -162,8 +162,39 @@ conc_letter_top_domain <- conc_letter_top_domain %>%
   mutate(incognito_equal_to_normal = incognito == normal)
 table(conc_letter_top_domain$incognito_equal_to_normal) # 33 TRUE
 
-### delete ?
-conc_letter_top_domain %>% 
-  filter(distinct_chars_incognito < 3 |
-           distinct_chars_normal < 3)
+### check urls for less than 5 unique domains
 
+df <- left_join(x = conc_letter_top_domain,
+                y = df,
+                by = "id")
+df %>% 
+  filter(distinct_chars_incognito < 5 |
+           distinct_chars_normal < 5) # 27 ids
+
+df_long_clean %>% 
+  group_by(id, browser_mode) %>% 
+  count(clean_no_url) %>%
+  filter(n > 1) %>% 
+  arrange(-n) %>% View()
+
+ids_27 <- 
+  df_long_clean %>% 
+  group_by(id, browser_mode) %>% 
+  count(clean_no_url) %>%
+  filter(n > 1) %>% 
+  group_by(id) %>%
+  select(id) %>% 
+  distinct() # 27 ids
+
+ids_21 <- 
+  df_long_clean %>% 
+  group_by(id, browser_mode) %>% 
+  count(clean_html_url) %>%
+  filter(n > 1) %>% 
+  group_by(id) %>%
+  select(id) %>% 
+  distinct() # 21 ids
+
+### fix
+df %>% filter(
+  id %in% filter(ids_27, id %in% ids_21$id == FALSE))
