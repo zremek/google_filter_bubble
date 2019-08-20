@@ -1,0 +1,63 @@
+---
+title: "filter_bubble_test_summary"
+author: "Remigiusz Żulicki"
+date: "20 08 2019"
+output: html_document
+---
+``` {r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+df <- read_csv("df_final.csv")
+```
+
+## Róźnica w wynikach wyszukiwania: tryb normalny vs. incognito
+
+Różnica wyrażona jest w liczbach całkowitych 0 - 5. Zero oznacza, że wyniki były identyczne. Róźnica > 0 oznacza, że wystąpiły różnice. 
+
+Różnicę obliczyliśmy metodą "osa" z pakietu stringdist https://journal.r-project.org/archive/2014-1/loo.pdf
+Metoda ta daje wyniki identyczne z metodą zastosowaną w badaniu DDG.
+
+Brane są pod uwagę cztery scenariusze:
+
+- Substitution of a character, as in ‘foo’→‘boo’.
+- Deletion of a character, as in ‘foo’→‘oo’.
+- Insertion of a character, as in ‘foo’→‘floo’.
+- Transposition of two adjacent characters, as in ‘foo’→‘ofo’.
+
+z których każdy ma wagę 1. U nas mogły wystąpić tylko dwa: substytucja i transpozycja.
+
+Podsumowanie różnicy poniżej:
+
+```{r osasummary, echo=FALSE}
+summary(df$dist_osa)
+```
+
+Rozkład różnicy:
+
+```{r osadistrib, echo=FALSE}
+qplot(factor(dist_osa), data = df)
+```
+
+``` {r osatbl, echo=FALSE}
+table(df$dist_osa)
+```
+
+## Różnica w grupach
+
+W podziale na rodzaj studiów:
+
+```{r rodzstud, echo=FALSE}
+qplot(factor(dist_osa), data = df, fill = `Rodzaj studiów`)
+```
+
+W podziale na płeć:
+
+```{r plec, echo=FALSE}
+qplot(factor(dist_osa), data = df, fill = `Twoja płeć`)
+```
+
+W podziale na umiejętność włączenia trybu incognito:
+
+``` {r canincogn, echo=FALSE}
+ggplot(df, aes(x = dist_osa, fill = `Do eksperymentu trzeba przygotować aparaturę. Czy potrafisz włączyć tryb prywatny (incognito) w swojej przeglądarce internetowej?`)) + geom_bar() + scale_fill_discrete(name = "Czy potrafisz włączyć tryb prywatny?")
+```

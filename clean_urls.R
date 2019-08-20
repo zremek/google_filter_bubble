@@ -53,7 +53,7 @@ distinct(df_long_clean, clean_html_url) %>%
   print(n = Inf)
 
 change_no_urls <- function(pattern, replacement, string){
-  for (i in 1:length(string)){
+  for (i in 1:length(string)) {
     if (grepl(pattern = pattern,
               x = string[i])) {
       string[i] <- replacement
@@ -118,7 +118,7 @@ top_domains <- df_long_clean %>%
   count() %>% 
   arrange(url_top_domain) 
 top_domains$letter_top_domain <- LETTERS[1:length(top_domains$url_top_domain)]
-top_domains$letter_top_domain[27:30] <- c("Ł","Ó", "Ż", "Ź") # to have 30 distinct letters
+top_domains$letter_top_domain[27:30] <- 1:4 # to have 30 distinct chars
 
 df_long_clean <- left_join(x = df_long_clean,
           y = top_domains,
@@ -167,15 +167,13 @@ table(conc_letter_top_domain$incognito_equal_to_normal) # 33 TRUE
 df <- left_join(x = conc_letter_top_domain,
                 y = df,
                 by = "id")
-df %>% 
-  filter(distinct_chars_incognito < 5 |
+ids_27_5 <- df %>% 
+  filter(distinct_chars_incognito < 5 | 
            distinct_chars_normal < 5) # 27 ids
 
-df_long_clean %>% 
-  group_by(id, browser_mode) %>% 
-  count(clean_no_url) %>%
-  filter(n > 1) %>% 
-  arrange(-n) %>% View()
+# check if an url occures more than once 
+# by person * browser mode
+# should be eqal to results above
 
 ids_27 <- 
   df_long_clean %>% 
@@ -186,6 +184,10 @@ ids_27 <-
   select(id) %>% 
   distinct() # 27 ids
 
+## check if the same
+table(ids_27_5$id == ids_27$id) # 27 TRUE
+
+# check the same on less clean urls 
 ids_21 <- 
   df_long_clean %>% 
   group_by(id, browser_mode) %>% 
@@ -195,6 +197,15 @@ ids_21 <-
   select(id) %>% 
   distinct() # 21 ids
 
-### fix
-df %>% filter(
-  id %in% filter(ids_27, id %in% ids_21$id == FALSE))
+### manual check of 6 = 27 - 21 
+# df_long_clean %>% 
+#   filter(id %in% pull(filter(ids_27, id %in% ids_21$id == FALSE))) %>% 
+#   select(id, browser_mode, search_order_short, clean_html_url, url_top_domain,
+#          letter_top_domain) %>% 
+#   View()
+
+### filter off 27 persons for further analysis
+df <- 
+  df %>% 
+  filter(distinct_chars_incognito == 5 &
+           distinct_chars_normal == 5)
