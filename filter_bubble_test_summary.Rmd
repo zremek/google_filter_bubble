@@ -2,12 +2,13 @@
 title: "filter_bubble_test_summary"
 author: "Remigiusz Żulicki"
 date: "20 08 2019"
-output: html_document
+output: rmarkdown::github_document
 ---
 ``` {r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
-df <- read_csv("df_final.csv")
+df_md <- read_csv("df_final.csv")
+df_long_md <- read_csv("df_long_final.csv")
 ```
 
 ## Róźnica w wynikach wyszukiwania: tryb normalny vs. incognito
@@ -29,17 +30,17 @@ z których każdy ma wagę 1. U nas mogły wystąpić tylko dwa: substytucja i t
 Podsumowanie różnicy poniżej:
 
 ```{r osasummary, echo=FALSE}
-summary(df$dist_osa)
+summary(df_md$dist_osa)
 ```
 
 Rozkład różnicy:
 
 ```{r osadistrib, echo=FALSE}
-qplot(factor(dist_osa), data = df)
+qplot(factor(dist_osa), data = df_md)
 ```
 
 ``` {r osatbl, echo=FALSE}
-table(df$dist_osa)
+table(df_md$dist_osa)
 ```
 
 ## Różnica w grupach
@@ -47,17 +48,59 @@ table(df$dist_osa)
 W podziale na rodzaj studiów:
 
 ```{r rodzstud, echo=FALSE}
-qplot(factor(dist_osa), data = df, fill = `Rodzaj studiów`)
+qplot(factor(dist_osa), data = df_md, fill = `Rodzaj studiów`)
 ```
 
 W podziale na płeć:
 
 ```{r plec, echo=FALSE}
-qplot(factor(dist_osa), data = df, fill = `Twoja płeć`)
+qplot(factor(dist_osa), data = df_md, fill = `Twoja płeć`)
 ```
 
 W podziale na umiejętność włączenia trybu incognito:
 
 ``` {r canincogn, echo=FALSE}
-ggplot(df, aes(x = dist_osa, fill = `Do eksperymentu trzeba przygotować aparaturę. Czy potrafisz włączyć tryb prywatny (incognito) w swojej przeglądarce internetowej?`)) + geom_bar() + scale_fill_discrete(name = "Czy potrafisz włączyć tryb prywatny?")
+ggplot(df_md, aes(x = dist_osa, fill = `Do eksperymentu trzeba przygotować aparaturę. Czy potrafisz włączyć tryb prywatny (incognito) w swojej przeglądarce internetowej?`)) + geom_bar() + scale_fill_discrete(name = "Czy potrafisz włączyć tryb prywatny?")
+```
+
+## Rozkład wyników wyszukiwania
+
+Każdej domenie przypisaliśmy znak (literę albo cyfrę), na potrzebę obliczenia wyżej omówionej różnicy między wynikami wyszukiwania - różnicy liczonej jako odległość pomiędzy ciągami znaków.
+
+Łącznie w obu trybach wyszukiwania uczestnicy naszego badania uzyskali 28 różnych domen.
+
+```{r domaintbl, echo=FALSE}
+knitr::kable(df_long_md %>% 
+  group_by(url_top_domain, letter_top_domain) %>% 
+  count())
+```
+
+Rozkład domen w podziale na kolejność na liście wyszukiwania i tryb przeglądarki
+
+```{r domain_ord_mode_count, echo=FALSE, fig.height=10, fig.width=12}
+ggplot(df_long_md, aes(x = fct_rev(fct_infreq(url_top_domain)),
+                       fill = factor(search_order_short))) +
+  geom_bar() + facet_grid(rows = vars(browser_mode)) +
+  coord_flip() +
+  scale_fill_ordinal()
+```
+
+Rozkład wyników wyszukiwania w podziale na tryb przeglądarki
+
+```{r search_res_mode_count, echo=FALSE, fig.height=10, fig.width=12}
+df_md %>% gather(incognito, normal, key = "browser_mode", value = "search_res") %>% 
+  ggplot(aes(x = search_res %>% fct_infreq() %>% fct_rev(), fill = browser_mode)) + 
+  geom_bar(position = "dodge") +
+  coord_flip()
+```
+
+Przykładowo najczęściej pojawiający się w trybie incognito zestaw wyników IVL3O oznacza, że osoba w odpowiedzi na zapytanie "Paweł Adamowicz" w wyszukiwarce Google uzyskała następujące domeny w podanej kolejności:
+
+```{r ivl3o, echo=FALSE}
+knitr::kable(
+  df_long_md %>% 
+               filter(letter_top_domain %in% c("I", "V", "L", "3", "O")) %>% 
+    select(letter_top_domain, url_top_domain) %>% 
+    distinct()) 
+  
 ```

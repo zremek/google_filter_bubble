@@ -24,14 +24,14 @@ df_long$clean_amp_s_url <- ifelse(test = grepl(pattern = "google.com/amp/s|googl
 #   filter(grepl("-android-", clean_amp_s_url)) %>% 
 #   View()
 
-df_long %>% select(clean_amp_s_url, id, search_order_short, browser_mode) %>% 
-  filter(id %in% c("idiotic_dalmatian"))
-df_long %>% select(clean_amp_s_url, id, search_order_short, browser_mode) %>% 
-  filter(id %in% c("topaz_caudata"))
-df_long %>% select(clean_amp_s_url, id, search_order_short, browser_mode) %>% 
-  filter(id %in% c("aquamarine_sambar"))
-df_long %>% select(clean_amp_s_url, id, search_order_short, browser_mode) %>% 
-  filter(id %in% c("semipetrified_anaconda"))
+# df_long %>% select(clean_amp_s_url, id, search_order_short, browser_mode) %>% 
+#   filter(id %in% c("idiotic_dalmatian"))
+# df_long %>% select(clean_amp_s_url, id, search_order_short, browser_mode) %>% 
+#   filter(id %in% c("topaz_caudata"))
+# df_long %>% select(clean_amp_s_url, id, search_order_short, browser_mode) %>% 
+#   filter(id %in% c("aquamarine_sambar"))
+# df_long %>% select(clean_amp_s_url, id, search_order_short, browser_mode) %>% 
+#   filter(id %in% c("semipetrified_anaconda"))
 
 # there are four urls containing "-android-", each for one person
 # we can't idetify exact search result for those urls
@@ -46,11 +46,11 @@ df_long_clean <- df_long %>%
 df_long_clean$clean_html_url <- gsub(pattern = "\\.html(.*)", replacement = "\\.html",
                                      x = df_long_clean$clean_amp_s_url)
 
-# change no-urls to actual urls and unify urls
-distinct(df_long_clean, clean_html_url) %>%
-  filter(grepl("http", clean_html_url) == FALSE) %>% 
-  arrange(clean_html_url) %>% 
-  print(n = Inf)
+# # change no-urls to actual urls and unify urls
+# distinct(df_long_clean, clean_html_url) %>%
+#   filter(grepl("http", clean_html_url) == FALSE) %>% 
+#   arrange(clean_html_url) %>% 
+#   print(n = Inf)
 
 change_no_urls <- function(pattern, replacement, string){
   for (i in 1:length(string)) {
@@ -98,7 +98,7 @@ df_long_clean <- df_long_clean %>%
                                        "https://pl.wikipedia.org/wiki/Pawe%C5%82_Adamowicz",
                                        clean_no_url))
 
-distinct(df_long_clean, clean_no_url) %>% arrange(clean_no_url) %>% print(n = Inf)
+# distinct(df_long_clean, clean_no_url) %>% arrange(clean_no_url) %>% print(n = Inf)
 
 # top domain
 df_long_clean <- df_long_clean %>% 
@@ -124,13 +124,13 @@ df_long_clean <- left_join(x = df_long_clean,
           y = top_domains,
           by = "url_top_domain")
 
-df_long_clean %>% select(id,
-                         browser_mode,
-                         search_order_short,
-                         letter_top_domain,
-                         clean_no_url) %>% 
-  filter(id %in% c("reportable_crayfish", "bioclimatic_whapuku")) %>% 
-  arrange(id, browser_mode, search_order_short)
+# df_long_clean %>% select(id,
+#                          browser_mode,
+#                          search_order_short,
+#                          letter_top_domain,
+#                          clean_no_url) %>% 
+#   filter(id %in% c("reportable_crayfish", "bioclimatic_whapuku")) %>% 
+#   arrange(id, browser_mode, search_order_short)
 
 # there are ids with the same top domain pasted multiple times for one browser mode  
 # ex. "bioclimatic_whapuku"
@@ -157,10 +157,10 @@ conc_letter_top_domain$distinct_chars_normal <- sapply(
   conc_letter_top_domain$normal,
   function(x) sum(!!str_count(x, top_domains$letter_top_domain)))
 
-# different browser mode, the same results (domains in order)?
-conc_letter_top_domain <- conc_letter_top_domain %>% 
-  mutate(incognito_equal_to_normal = incognito == normal)
-table(conc_letter_top_domain$incognito_equal_to_normal) # 33 TRUE
+# # different browser mode, the same results (domains in order)?
+# conc_letter_top_domain <- conc_letter_top_domain %>% 
+#   mutate(incognito_equal_to_normal = incognito == normal)
+# table(conc_letter_top_domain$incognito_equal_to_normal) # 33 TRUE
 
 ### check urls for less than 5 unique domains
 
@@ -185,7 +185,7 @@ ids_27 <-
   distinct() # 27 ids
 
 ## check if the same
-table(ids_27_5$id == ids_27$id) # 27 TRUE
+# table(ids_27_5$id == ids_27$id) # 27 TRUE
 
 # check the same on less clean urls 
 ids_21 <- 
