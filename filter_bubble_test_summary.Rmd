@@ -87,19 +87,20 @@ ggplot(df_long_md, aes(x = fct_rev(fct_infreq(url_top_domain)),
 
 Rozkład wyników wyszukiwania w podziale na tryb przeglądarki
 
-```{r search_res_mode_count, echo=FALSE, fig.height=10, fig.width=12}
+```{r search_res_mode_count, echo=FALSE, fig.height=8, fig.width=14}
 df_md %>% gather(incognito, normal, key = "browser_mode", value = "search_res") %>% 
   ggplot(aes(x = search_res %>% fct_infreq() %>% fct_rev(), fill = browser_mode)) + 
   geom_bar(position = "dodge") +
+  facet_grid(col = vars(browser_mode)) +
   coord_flip()
 ```
 
-Przykładowo najczęściej pojawiający się w trybie incognito zestaw wyników IVL3O oznacza, że osoba w odpowiedzi na zapytanie "Paweł Adamowicz" w wyszukiwarce Google uzyskała następujące domeny w podanej kolejności:
+Przykładowo najczęściej pojawiający się (8 na 73 wyniki) w trybie incognito zestaw wyników IVB31 oznacza, że osoba w odpowiedzi na zapytanie "Paweł Adamowicz" w wyszukiwarce Google uzyskała następujące domeny w podanej kolejności:
 
 ```{r ivl3o, echo=FALSE}
 knitr::kable(
   df_long_md %>% 
-               filter(letter_top_domain %in% c("I", "V", "L", "3", "O")) %>% 
+               filter(letter_top_domain %in% c("I", "V", "B", "3", "1")) %>% 
     select(letter_top_domain, url_top_domain) %>% 
     distinct()) 
   

@@ -100,15 +100,15 @@ przeglądarki
 
 ![](filter_bubble_test_summary_files/figure-gfm/search_res_mode_count-1.png)<!-- -->
 
-Przykładowo najczęściej pojawiający się w trybie incognito zestaw
-wyników IVL3O oznacza, że osoba w odpowiedzi na zapytanie “Paweł
-Adamowicz” w wyszukiwarce Google uzyskała następujące domeny w podanej
-kolejności:
+Przykładowo najczęściej pojawiający się (8 na 73 wyniki) w trybie
+incognito zestaw wyników IVB31 oznacza, że osoba w odpowiedzi na
+zapytanie “Paweł Adamowicz” w wyszukiwarce Google uzyskała następujące
+domeny w podanej kolejności:
 
-| letter\_top\_domain | url\_top\_domain       |
-| :------------------ | :--------------------- |
-| I                   | pl.wikipedia.org       |
-| V                   | www.facebook.com       |
-| L                   | trojmiasto.wyborcza.pl |
-| 3                   | www.wprost.pl          |
-| O                   | wiadomosci.gazeta.pl   |
+| letter\_top\_domain | url\_top\_domain  |
+| :------------------ | :---------------- |
+| I                   | pl.wikipedia.org  |
+| V                   | www.facebook.com  |
+| B                   | bialystok.onet.pl |
+| 3                   | www.wprost.pl     |
+| 1                   | www.trojmiasto.pl |
