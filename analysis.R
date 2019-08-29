@@ -52,12 +52,12 @@ df <- df %>%
 #   filter(id %in% df$id)),
 #   "df_long_final.csv")
 
-kruskal.test(dist_osa ~ `Do eksperymentu trzeba przygotować aparaturę. Czy potrafisz włączyć tryb prywatny (incognito) w swojej przeglądarce internetowej?`,
-             data = df) 
-kruskal.test(dist_osa ~ `Rodzaj studiów`, data = df)
-kruskal.test(dist_osa ~ `Twoja płeć`, data = df)
-kruskal.test(dist_osa ~ `Rodzaj studiów`, data = df)
-kruskal.test(dist_osa ~ `Twój rok urodzenia`, data = df)
-# all not significant
+# kruskal.test(dist_osa ~ `Do eksperymentu trzeba przygotować aparaturę. Czy potrafisz włączyć tryb prywatny (incognito) w swojej przeglądarce internetowej?`,
+#              data = df) 
+# kruskal.test(dist_osa ~ `Rodzaj studiów`, data = df)
+# kruskal.test(dist_osa ~ `Twoja płeć`, data = df)
+# kruskal.test(dist_osa ~ `Rodzaj studiów`, data = df)
+# kruskal.test(dist_osa ~ `Twój rok urodzenia`, data = df)
+# # all not significant
 
-table(df$incognito, df$normal)
+
