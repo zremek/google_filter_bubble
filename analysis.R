@@ -1,5 +1,6 @@
 library(stringdist)
 library(tidyverse)
+library(irr)
 
 # https://journal.r-project.org/archive/2014-1/loo.pdf
 
@@ -9,7 +10,18 @@ df <- df %>%
                                            method = "osa"),
          dist_dl = stringdist::stringdist(a = incognito,
                                           b = normal,
-                                          method = "dl"))
+                                          method = "dl"),
+         dist_substitution_only = stringdist::stringdist(a = incognito,
+                                                         b = normal,
+                                                         method = "hamming")) # fix it
+
+df %>% filter(dist_substitution_only > dist_osa) %>% 
+  select(dist_osa, dist_substitution_only, incognito, normal)
+         # ,
+         # dist_transposition_only = stringdist::stringdist(a = incognito,
+         #                                                  b = normal,
+         #                                                  method = "osa",
+         #                                                  weight = c(0.1,0.1,0.1,1)))
 
 # summary(df$dist_osa)
 # summary(df$dist_dl)
@@ -61,3 +73,27 @@ df <- df %>%
 # # all not significant
 # 
 # 
+
+#### normal vs incognito as paired nominal vs nominal problem
+
+ggplot(filter(df, dist_osa > 0)) + 
+  geom_bar(aes(x = normal, fill = incognito), 
+           position = "dodge") +
+  coord_flip()
+
+ggplot(df) + 
+  geom_bar(aes(x = normal, fill = incognito), 
+           position = "fill") +
+  coord_flip()
+
+irr::bhapkar(sapply(df[,2:3], as.factor))
+
+as.factor(df[,2:3])
+
+x <- tibble(a = LETTERS, b = LETTERS)
+x$b[2] <- "A"
+bhapkar(x)
+
+
+df_dist_osa_greater_than_zero <- filter(df, dist_osa > 0)
+table(df_dist_osa_greater_than_zero$normal, df_dist_osa_greater_than_zero$incognito)
