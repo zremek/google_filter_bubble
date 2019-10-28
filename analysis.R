@@ -1,6 +1,8 @@
 library(stringdist)
 library(tidyverse)
 library(irr)
+library(combinat)
+library(DescTools)
 
 # https://journal.r-project.org/archive/2014-1/loo.pdf
 
@@ -10,18 +12,37 @@ df <- df %>%
                                            method = "osa"),
          dist_dl = stringdist::stringdist(a = incognito,
                                           b = normal,
-                                          method = "dl"),
-         dist_substitution_only = stringdist::stringdist(a = incognito,
-                                                         b = normal,
-                                                         method = "hamming")) # fix it
+                                          method = "dl"))
 
-df %>% filter(dist_substitution_only > dist_osa) %>% 
-  select(dist_osa, dist_substitution_only, incognito, normal)
-         # ,
-         # dist_transposition_only = stringdist::stringdist(a = incognito,
-         #                                                  b = normal,
-         #                                                  method = "osa",
-         #                                                  weight = c(0.1,0.1,0.1,1)))
+# check for permutations
+
+is_x_permutation_of_y <- function(x, y) {
+  tmp <- combinat::permn(unlist(strsplit(y, "")))
+  x %in% lapply(tmp, function(z) paste(z, collapse = ""))  
+}
+
+df$is_incognito_permutation_of_normal <- NA
+
+for (i in 1:dim(df)[1]) {
+  df$is_incognito_permutation_of_normal[i] <- 
+    is_x_permutation_of_y(df$incognito[i], df$normal[i])
+}
+
+# a <- NA
+# for (i in 1:dim(df)[1]) {
+#   a[i] <- is_x_permutation_of_y(df$normal[i], df$incognito[i])
+# }
+# 
+# table(df$is_incognito_permutation_of_normal == a) # it's symetrical as it should be
+# table(a)
+
+## visual check
+# ggplot(df) +
+#   geom_bar(aes(x = dist_osa, fill = is_incognito_permutation_of_normal))
+# 
+# df %>% filter(dist_osa > 0) %>% 
+#   select(incognito, normal, dist_osa, is_incognito_permutation_of_normal) %>% 
+#   View()
 
 # summary(df$dist_osa)
 # summary(df$dist_dl)
@@ -53,9 +74,13 @@ df %>% filter(dist_substitution_only > dist_osa) %>%
 
 ##### check done in .ipynb file
 
+
+
 # The "osa" method form R package stringdist gave results equal 
 # to method implemented in damerau_levenshtein_distance 
 # form pyxdameraulevenshtein Python package
+
+
 
 ## export final df to later use
 # write_csv(df, "df_final.csv")
@@ -63,6 +88,8 @@ df %>% filter(dist_substitution_only > dist_osa) %>%
 # write_csv((df_long_clean %>%
 #   filter(id %in% df$id)),
 #   "df_long_final.csv")
+
+### tests
 
 # kruskal.test(dist_osa ~ `Do eksperymentu trzeba przygotować aparaturę. Czy potrafisz włączyć tryb prywatny (incognito) w swojej przeglądarce internetowej?`,
 #              data = df)
@@ -74,26 +101,100 @@ df %>% filter(dist_substitution_only > dist_osa) %>%
 # 
 # 
 
-#### normal vs incognito as paired nominal vs nominal problem
-
-ggplot(filter(df, dist_osa > 0)) + 
-  geom_bar(aes(x = normal, fill = incognito), 
-           position = "dodge") +
-  coord_flip()
-
-ggplot(df) + 
-  geom_bar(aes(x = normal, fill = incognito), 
-           position = "fill") +
-  coord_flip()
-
-irr::bhapkar(sapply(df[,2:3], as.factor))
-
-as.factor(df[,2:3])
-
-x <- tibble(a = LETTERS, b = LETTERS)
-x$b[2] <- "A"
-bhapkar(x)
+#### compute indexes
 
 
-df_dist_osa_greater_than_zero <- filter(df, dist_osa > 0)
-table(df_dist_osa_greater_than_zero$normal, df_dist_osa_greater_than_zero$incognito)
+## conservative -- liberal as 'światopogląd' (worldview) https://cbos.pl/SPISKOM.POL/2015/K_085_15.PDF 
+# 2nd question has reversed wording (use "8 -" shortcut)
+# cons_lib_index higher == more conservative
+
+cor(df[,20:22]) %>% View()
+df$cons_lib_index <- df[[20]] + (8 - df[[21]]) + df[[22]]
+  
+
+## Internet users' information privacy concerns: 'control' https://pubsonline.informs.org/doi/abs/10.1287/isre.1040.0032
+# 3rd has reversed wording
+# privacy_index higher == higher control
+
+cor(df[,27:29]) %>% View()
+df$privacy_index <- df[[27]] + df[[28]] + (8 - df[[29]])
+
+
+ggplot(df) +
+  geom_point(aes(x = cons_lib_index, y = privacy_index, 
+                 colour = ordered(dist_osa)),
+             size = 7, position = 'jitter', alpha = 3/4)
+
+
+ggplot(df %>% filter(dist_osa > 0)) +
+  geom_point(aes(x = cons_lib_index, y = privacy_index, 
+                 colour = ordered(dist_osa), shape = is_incognito_permutation_of_normal),
+             size = 7, position = 'jitter', alpha = 3/4)
+
+summary(df$cons_lib_index)
+summary(df$privacy_index)
+
+DescTools::JonckheereTerpstraTest(x = df$cons_lib_index,
+                                  g = ordered(df$dist_osa),
+                                  alternative = c("decreasing"))
+
+DescTools::JonckheereTerpstraTest(x = df$privacy_index,
+                                  g = ordered(df$dist_osa),
+                                  alternative = "increasing")
+
+DescTools::JonckheereTerpstraTest(x = df$cons_lib_index,
+                                  g = ordered(df$dist_osa),
+                                  alternative = c("two.sided"))
+
+DescTools::JonckheereTerpstraTest(x = df$privacy_index,
+                                  g = ordered(df$dist_osa),
+                                  alternative = "two.sided",
+                                  nperm = 10000)
+
+lm(formula = is_incognito_permutation_of_normal ~ privacy_index + cons_lib_index + `Rodzaj studiów` +
+     `Twój rok urodzenia` + `Twoja płeć`,
+   data = df) %>% summary()
+
+plot(df[[22]], df$dist_osa)
+
+DescTools::JonckheereTerpstraTest(x = df$`Konkordat:`,
+                                  g = ordered(df$dist_osa),
+                                  alternative = c("two.sided"))
+DescTools::JonckheereTerpstraTest(x = df$`Przerywanie ciąży:`,
+                                  g = ordered(df$dist_osa),
+                                  alternative = c("two.sided"))
+DescTools::JonckheereTerpstraTest(x = df$`Związki osób tej samej płci:`,
+                                  g = ordered(df$dist_osa),
+                                  alternative = c("two.sided"))
+
+DescTools::JonckheereTerpstraTest(x = df[[27]],
+                                  g = ordered(df$dist_osa),
+                                  alternative = c("two.sided"))
+DescTools::JonckheereTerpstraTest(x = df[[28]],
+                                  g = ordered(df$dist_osa),
+                                  alternative = c("two.sided"))
+DescTools::JonckheereTerpstraTest(x = df[[29]],
+                                  g = ordered(df$dist_osa),
+                                  alternative = c("two.sided"))
+
+DescTools::JonckheereTerpstraTest(x = df$`Konkordat:`,
+                                  g = ordered(df$dist_osa),
+                                  alternative = c("decreasing"))
+DescTools::JonckheereTerpstraTest(x = df$`Przerywanie ciąży:`,
+                                  g = ordered(df$dist_osa),
+                                  alternative = c("decreasing"))
+DescTools::JonckheereTerpstraTest(x = df$`Związki osób tej samej płci:`,
+                                  g = ordered(df$dist_osa),
+                                  alternative = c("decreasing"))
+
+DescTools::JonckheereTerpstraTest(x = df[[27]],
+                                  g = ordered(df$dist_osa),
+                                  alternative = c("decreasing"))
+DescTools::JonckheereTerpstraTest(x = df[[28]],
+                                  g = ordered(df$dist_osa),
+                                  alternative = c("decreasing"))
+DescTools::JonckheereTerpstraTest(x = df[[29]],
+                                  g = ordered(df$dist_osa),
+                                  alternative = c("decreasing"))
+
+ggplot(df) + geom_jitter(aes(x = `Przerywanie ciąży:`, y = dist_osa))
