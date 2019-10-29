@@ -86,8 +86,10 @@ for (i in 1:dim(df)[1]) {
 # kruskal.test(dist_osa ~ `Do eksperymentu trzeba przygotować aparaturę. Czy potrafisz włączyć tryb prywatny (incognito) w swojej przeglądarce internetowej?`,
 #              data = df)
 # kruskal.test(dist_osa ~ `Rodzaj studiów`, data = df)
+wilcox.test(dist_osa ~ `Rodzaj studiów`, 
+            data = df, paired=FALSE, exact=FALSE, conf.int=TRUE)
+
 # kruskal.test(dist_osa ~ `Twoja płeć`, data = df)
-# kruskal.test(dist_osa ~ `Rodzaj studiów`, data = df)
 # kruskal.test(dist_osa ~ `Twój rok urodzenia`, data = df)
 # # all not significant
 # 
@@ -307,7 +309,17 @@ ggplot(df) + geom_count(aes(x = normal_count, y = incognito_count))
 lm(normal_count ~ incognito_count, data = df) %>% summary()
 cor.test(df$normal_count, df$incognito_count, method = "spearman")
 
-## export final df to later use
+### check time
+summary(df$`Sygnatura czasowa`)
+df$month_day <- paste(lubridate::month(df$`Sygnatura czasowa`), lubridate::day(df$`Sygnatura czasowa`), sep = "_")
+df$month <- lubridate::month(df$`Sygnatura czasowa`)
+
+kruskal.test(dist_osa ~ month_day, df)
+kruskal.test(dist_osa ~ month, df)
+wilcox.test(dist_osa ~ month, 
+            data = df, paired=FALSE, exact=FALSE, conf.int=TRUE)
+
+# # export final df to later use
 # write_csv(df, "df_final.csv")
 # 
 # write_csv((df_long_clean %>%

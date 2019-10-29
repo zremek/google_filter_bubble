@@ -2,7 +2,9 @@
 title: "filter_bubble_paper_results"
 author: "Remigiusz Żulicki"
 date: "29 10 2019"
-output: html_document
+output:
+  html_document: default
+  word_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -14,7 +16,7 @@ df_long_md <- read_csv("df_long_final.csv")
 
 ## Rozkład wyników wyszukiwania
 
-Osoby uczestniczące w naszym badaniu zostały poproszone o podanie dokładnego adresu url dla pięciu pierwszych wyników wyszukiwania hasła "Paweł Adamowicz" w wyszukiwarce Google. Zebraliśmy po pięć pierwszych wyników dla trybu normalnego i prywatnego przeglądarki internetowej. Uzyskaliśmy odpowiedzi od 105 osób, jednak po wyczyszczeniu tekstów, wprowadzonych jako adresy url, pozostawiliśmy odpowiedzi 73 osób [wyjaśnić w przyp. dolnym]. Zatem łącznie przeanalizowaliśmy 730 adresów url - po 10 dla jednego uczestnika. Każdy adres url skróciliśmy do domeny głównej. Każdej domenie przypisaliśmy znak (literę albo cyfrę), na potrzebę obliczenia różnicy między zestawami wyników wyszukiwania. Łącznie w obu trybach wyszukiwania uczestnicy naszego badania uzyskali 28 różnych domen (tabela 1).
+Osoby uczestniczące w naszym badaniu zostały poproszone o podanie dokładnego adresu url dla pięciu pierwszych wyników wyszukiwania hasła "Paweł Adamowicz" w wyszukiwarce Google. Zebraliśmy po pięć pierwszych wyników dla trybu normalnego (przy zalogowaniu na konto Google) i prywatnego przeglądarki internetowej. Uzyskaliśmy odpowiedzi od 105 osób, jednak po wyczyszczeniu tekstów, wprowadzonych jako adresy url, pozostawiliśmy odpowiedzi 73 osób [wyjaśnić w przyp. dolnym]. Zatem łącznie przeanalizowaliśmy 730 adresów url - po 10 dla jednego uczestnika. Każdy adres url skróciliśmy do domeny głównej. Każdej domenie przypisaliśmy znak (literę albo cyfrę), na potrzebę obliczenia różnicy między zestawami wyników wyszukiwania. Łącznie w obu trybach wyszukiwania uczestnicy naszego badania uzyskali 28 różnych domen (tabela 1).
 
 ```{r domaintbl, echo=FALSE}
 knitr::kable(df_long_md %>% 
@@ -23,12 +25,13 @@ knitr::kable(df_long_md %>%
   arrange(-n) %>% 
   rename(`Domena główna` = "url_top_domain",
          `Znak przypisany` = "letter_top_domain",
-         `Liczebność` = "n"))
+         `Liczebność [łączna ilość wystąpień domeny, n = 730]` = "n"),
+  caption = "Źródło: badania własne")
 ```
 
 Domeny te ułożone były w różnej kolejności, od pierwszej do piątej pozycji na liście wyników wyszukiwania. W podziale na tryb przeglądarki różnice w kolejności były niewielkie dla najczęściej pojawiających się domen (pierwsza pozycja - pl.wikipedia.org; druga - www.facebook.com; trzecia - www.wprost.pl). Niektóre domeny (www.gdansk.pl; trojmiasto.onet.pl; wiadomosci.onet.pl) pojawiły się tylko w trybie normalnym przeglądarki, inne (tysol.pl; www.rp.pl) tylko w trybie prywatnym (wykres 1).
 
-```{r domain_ord_mode_count, echo=FALSE, fig.height=10, fig.width=8}
+```{r domain_ord_mode_count, echo=FALSE, fig.height=14, fig.width=8}
 df_long_md <- df_long_md %>% 
   mutate(browser_mode = factor(browser_mode)) %>%
   mutate(browser_mode = forcats::fct_recode(
@@ -42,12 +45,13 @@ ggplot(df_long_md, aes(x = fct_rev(fct_infreq(url_top_domain)),
   coord_flip() +
   labs(x = 'Domena główna',
        y = 'Liczebność [łączna ilość wystąpień domeny, n = 730]',
-       title = 'Rozkład domen głównych w podziale na kolejność na liście wyszukiwania i tryb przeglądarki',
+       title = 'Rozkład domen głównych w podziale na kolejność na liście\nwyników wyszukiwania i tryb przeglądarki',
        caption = "Źródło: badania własne") +
-  scale_fill_ordinal(name = "Kolejność na liście\nwyników wyszukiwania")
+  scale_fill_ordinal(name = "Kolejność na liście\nwyników wyszukiwania") +
+  theme(legend.position = "bottom")
 ```
 
-Jako zestaw wyników wyszukiwania (dalej: ZWW) traktujemy pięć domen, zapisanych w kolejności dla jednego uczestnika badania. Przykładowo najczęściej pojawiający się ZWW (8 na 73 osoby w trybie prywatnym; 5 w trybie normalnym) IVB31 oznacza, że osoba w odpowiedzi na zapytanie "Paweł Adamowicz" w wyszukiwarce Google uzyskała następujące domeny w podanej kolejności (tabela 2):
+Jako zestaw wyników wyszukiwania (dalej: ZWW) traktujemy pięć domen, zapisanych w kolejności wyświetlania w wynikach wyszukiwarki Google dla jednego uczestnika badania. Przykładowo najczęściej pojawiający się ZWW (8 na 73 osoby w trybie prywatnym; 5 w trybie normalnym) IVB31 oznacza, że osoba w odpowiedzi na zapytanie "Paweł Adamowicz" w wyszukiwarce Google uzyskała następujące domeny w podanej kolejności (tabela 2):
 
 ```{r ivl3o, echo=FALSE}
 knitr::kable(
@@ -56,15 +60,16 @@ knitr::kable(
     select(letter_top_domain, url_top_domain) %>% 
     distinct() %>% 
     rename(`Domena główna` = "url_top_domain",
-         `Znak przypisany` = "letter_top_domain"))
+         `Znak przypisany` = "letter_top_domain"),
+  caption = "Źródło: badania własne")
   
 ```
 
-Łącznie w dwóch trybach przeglądarki dla 73 osób uzyskano 73 różne ZWW. Nie oznacza to, że każdy uczestnik zobaczył inny zestaw, bowiem w trybie normalnym było to 50 ZWW, a w prywatnym 51. Niemniej ZWW powtarzają się rzadko. W trybie normalnym niepowtarzalny ZWW uzyskało 37 z 73 osób. W trybie prywatnym było to 38 osób. **Zatem większość uczestników badania widziało ZWW, którego nie widziała żadna inna osoba. To właśnie określane jest jako bańki informacyjne**. Żaden ZWW nie pojawił się więcej, niż osiem razy -  wymienione IVB31 w trybie prywatnym. Pojedyncze ZWW występowały tylko w jednym trybie (wykres 2). 
+Łącznie w dwóch trybach przeglądarki dla 73 osób uzyskano 73 różne ZWW. Nie oznacza to, że każdy uczestnik zobaczył inny zestaw, bowiem w trybie normalnym było to 50 ZWW, a w prywatnym 51. Niemniej ZWW powtarzają się rzadko. W trybie normalnym niepowtarzalny ZWW uzyskało 37 z 73 osób. W trybie prywatnym było to 38 osób. **Zatem większość uczestników badania widziało ZWW, którego nie widziała żadna inna osoba. To właśnie określane jest jako bańki informacyjne**. [odnieść się do wyników DDG] Żaden ZWW nie pojawił się więcej, niż osiem razy -  wymienione IVB31 w trybie prywatnym. Pojedyncze ZWW występowały tylko w jednym trybie (wykres 2). 
 
 ```{r countZWW, include=FALSE, echo=FALSE}
-table(df$normal_count); table(df$incognito_count)
-
+table(df_md$normal_count)
+table(df_md$incognito_count)
 ```
 ```{r search_res_mode_count, echo=FALSE, fig.height=10, fig.width=8}
 df_md %>% gather(incognito, normal, key = "browser_mode", value = "search_res") %>%
@@ -106,7 +111,7 @@ Naszym zdaniem w kontekście wyszukiwania informacji w internecie scenariusz, w 
 summary(df_md$dist_osa)
 table(df_md$dist_osa)
 table(df_md$is_incognito_permutation_of_normal)
-table(df$dist_osa, df_md$is_incognito_permutation_of_normal)
+table(df_md$dist_osa, df_md$is_incognito_permutation_of_normal)
 ```
 ```{r osadistrib, echo=FALSE}
 ggplot(df_md) +
@@ -116,12 +121,60 @@ ggplot(df_md) +
        title = 'Róźnica w ZWW: tryb normalny vs. tryb prywatny przeglądarki',
        subtitle = "obliczono metodą OSA",
        caption = "Źródło: badania własne") +
-  scale_fill_discrete(name = "Czy ZWW\nw trybie prywatnym\njest tylko permutacją ZWW\nw trybie normalnym?",
-                      labels = c("nie", "tak"))
+  scale_fill_discrete(name = "Czy ZWW w trybie prywatnym jest tylko\npermutacją ZWW w trybie normalnym?",
+                      labels = c("nie", "tak")) +
+  theme(legend.position = "bottom")
 ```
 
-Dalej testy.
+## Testowanie hipotez
 
-interpretacja w:
+Na etapie projektowania badania postawiliśmy robocze hipotezy, że wynik OSA mogą różnicować zmienne:
+- rok urodzenia osoby uczestniczącej w badaniu
+- płeć
+- rodzaj studiów 
+- umiejętność korzystania z trybu prywatnego przeglądarki
+- światopogląd w wymiarze liberalizm/konserwatyzm
+- nastawienie do kontroli prywatności użytkownika internetu
+Z uwagi na specyfikę realizacji badania sprawdziliśmy także, czy wynik OSA różnicował czas odpowiedzi:
+- miesiąc i dzień
+- miesiąc.
+We wszystkich wyżej wymienionych przypadkach różnice były nieistotne statystycznie.
 
-dla mniej spersonalizowanych zestawów wyników wyszukiwania (które pojawiły się więcej niż dwojgu respondentów), mediana dist_osa była niższa, niż dla bardziej spersonalizowanych wyników wyszukiwania (które pojawiły się tylko pojedynczym respondentom lub dwojgu respondentów)
+W toku analizy postawiliśmy zatem kolejną hipotezę, że wyniki OSA może róznicować stopień personalizacji ZWW w trybie normalnym.
+Jako wskaźnik tego stopnia personalizacji przyjęliśmy ilość wystąpień ZWW (od 0 do 5, por. wykres 2), za punkt odcięcia przyjmując dwa wystąpienia. **Dla mniej spersonalizowanych ZWW (czyli takich, które pojawiły się więcej niż dwojgu respondentów, Mediana OSA = 0), różnica OSA była istotnie niższa, niż dla bardziej spersonalizowanych ZWW (które pojawiły się tylko pojedynczym respondentom lub dwojgu, Mediana OSA = 1)**, *W* = 697,5; *p* < 0,05; *r* = -0,252. Wartość *r* wskazuje na wielkość efektu (*effect size*) między małą a średnią [Field pg. 666].
+
+``` {r dist_osa_by_normal_count_test, include=FALSE, echo=FALSE}
+w <- wilcox.test(dist_osa ~ normal_count > 2, 
+            data = df_md, paired=FALSE, exact=FALSE, conf.int=TRUE)
+print(w)
+
+# Field, A., Miles, J., & Field, Z. (2012). 
+# Discovering Statistics Using R. SAGE Publications Ltd. pg. 665
+
+rFromWilcox<-function(wilcoxModel, N){
+  z<- qnorm(wilcoxModel$p.value/2)
+  r<- z/ sqrt(N)
+  cat(wilcoxModel$data.name, 'Effect Size, r = ', r)
+}
+
+rFromWilcox(w, dim(df_md)[1])
+```
+
+Różnicę tę przedstawiamy na wykresie 4.
+
+```{r dist_osa_by_normal_count_plot, echo=FALSE}
+ggplot(df_md, aes(x = normal_count > 2, y = dist_osa)) + 
+  geom_boxplot() +
+  geom_dotplot(binaxis = "y", stackdir = "center",
+               binwidth = 1/5,
+               alpha = 3/4,
+               aes(fill = ordered(dist_osa),
+                   colour = ordered(dist_osa))) +
+  labs(x = "Liczebność ZWW w trybie normalnym > 2",
+       y = 'OSA',
+       title = 'Różnica OSA w podziale na stopień personalizacji ZWW w trybie normalnym',
+       subtitle = "mniej spersonalizowane ZWW oznacza, że liczebność ZWW\nw trybie  normalnym była większa niż 2",
+       caption = "Źródło: badania własne") +
+  guides(fill = "none", colour = "none") +
+  scale_x_discrete(labels = c("nie", "tak"))
+```
