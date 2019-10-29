@@ -1,0 +1,127 @@
+---
+title: "filter_bubble_paper_results"
+author: "Remigiusz Żulicki"
+date: "29 10 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+df_md <- read_csv("df_final.csv")
+df_long_md <- read_csv("df_long_final.csv")
+```
+
+## Rozkład wyników wyszukiwania
+
+Osoby uczestniczące w naszym badaniu zostały poproszone o podanie dokładnego adresu url dla pięciu pierwszych wyników wyszukiwania hasła "Paweł Adamowicz" w wyszukiwarce Google. Zebraliśmy po pięć pierwszych wyników dla trybu normalnego i prywatnego przeglądarki internetowej. Uzyskaliśmy odpowiedzi od 105 osób, jednak po wyczyszczeniu tekstów, wprowadzonych jako adresy url, pozostawiliśmy odpowiedzi 73 osób [wyjaśnić w przyp. dolnym]. Zatem łącznie przeanalizowaliśmy 730 adresów url - po 10 dla jednego uczestnika. Każdy adres url skróciliśmy do domeny głównej. Każdej domenie przypisaliśmy znak (literę albo cyfrę), na potrzebę obliczenia różnicy między zestawami wyników wyszukiwania. Łącznie w obu trybach wyszukiwania uczestnicy naszego badania uzyskali 28 różnych domen (tabela 1).
+
+```{r domaintbl, echo=FALSE}
+knitr::kable(df_long_md %>% 
+  group_by(url_top_domain, letter_top_domain) %>% 
+  count() %>% 
+  arrange(-n) %>% 
+  rename(`Domena główna` = "url_top_domain",
+         `Znak przypisany` = "letter_top_domain",
+         `Liczebność` = "n"))
+```
+
+Domeny te ułożone były w różnej kolejności, od pierwszej do piątej pozycji na liście wyników wyszukiwania. W podziale na tryb przeglądarki różnice w kolejności były niewielkie dla najczęściej pojawiających się domen (pierwsza pozycja - pl.wikipedia.org; druga - www.facebook.com; trzecia - www.wprost.pl). Niektóre domeny (www.gdansk.pl; trojmiasto.onet.pl; wiadomosci.onet.pl) pojawiły się tylko w trybie normalnym przeglądarki, inne (tysol.pl; www.rp.pl) tylko w trybie prywatnym (wykres 1).
+
+```{r domain_ord_mode_count, echo=FALSE, fig.height=10, fig.width=8}
+df_long_md <- df_long_md %>% 
+  mutate(browser_mode = factor(browser_mode)) %>%
+  mutate(browser_mode = forcats::fct_recode(
+    .f = browser_mode,
+    `tryb normalny` = "normal",
+    `tryb prywatny` = "incognito"))
+
+ggplot(df_long_md, aes(x = fct_rev(fct_infreq(url_top_domain)),
+                       fill = ordered(search_order_short))) +
+  geom_bar() + facet_grid(rows = vars(browser_mode)) +
+  coord_flip() +
+  labs(x = 'Domena główna',
+       y = 'Liczebność [łączna ilość wystąpień domeny, n = 730]',
+       title = 'Rozkład domen głównych w podziale na kolejność na liście wyszukiwania i tryb przeglądarki',
+       caption = "Źródło: badania własne") +
+  scale_fill_ordinal(name = "Kolejność na liście\nwyników wyszukiwania")
+```
+
+Jako zestaw wyników wyszukiwania (dalej: ZWW) traktujemy pięć domen, zapisanych w kolejności dla jednego uczestnika badania. Przykładowo najczęściej pojawiający się ZWW (8 na 73 osoby w trybie prywatnym; 5 w trybie normalnym) IVB31 oznacza, że osoba w odpowiedzi na zapytanie "Paweł Adamowicz" w wyszukiwarce Google uzyskała następujące domeny w podanej kolejności (tabela 2):
+
+```{r ivl3o, echo=FALSE}
+knitr::kable(
+  df_long_md %>% 
+               filter(letter_top_domain %in% c("I", "V", "B", "3", "1")) %>% 
+    select(letter_top_domain, url_top_domain) %>% 
+    distinct() %>% 
+    rename(`Domena główna` = "url_top_domain",
+         `Znak przypisany` = "letter_top_domain"))
+  
+```
+
+Łącznie w dwóch trybach przeglądarki dla 73 osób uzyskano 73 różne ZWW. Nie oznacza to, że każdy uczestnik zobaczył inny zestaw, bowiem w trybie normalnym było to 50 ZWW, a w prywatnym 51. Niemniej ZWW powtarzają się rzadko. W trybie normalnym niepowtarzalny ZWW uzyskało 37 z 73 osób. W trybie prywatnym było to 38 osób. **Zatem większość uczestników badania widziało ZWW, którego nie widziała żadna inna osoba. To właśnie określane jest jako bańki informacyjne**. Żaden ZWW nie pojawił się więcej, niż osiem razy -  wymienione IVB31 w trybie prywatnym. Pojedyncze ZWW występowały tylko w jednym trybie (wykres 2). 
+
+```{r countZWW, include=FALSE, echo=FALSE}
+table(df$normal_count); table(df$incognito_count)
+
+```
+```{r search_res_mode_count, echo=FALSE, fig.height=10, fig.width=8}
+df_md %>% gather(incognito, normal, key = "browser_mode", value = "search_res") %>%
+  mutate(browser_mode = factor(browser_mode)) %>%
+  mutate(browser_mode = forcats::fct_recode(
+    .f = browser_mode,
+    `tryb normalny` = "normal",
+    `tryb prywatny` = "incognito")) %>% 
+  ggplot(aes(x = search_res %>% fct_infreq() %>% fct_rev(), fill = browser_mode)) + 
+  geom_bar(position = "dodge") +
+  facet_grid(col = vars(browser_mode)) +
+  coord_flip() +
+  labs(x = 'Zestaw wyników wyszukiwania (ZWW)',
+       y = 'Liczebność [ilość uczestników, która uzyskała ZWW, n = 73]',
+       title = 'Rozkład ZWW w podziale na tryb przeglądarki',
+       caption = "Źródło: badania własne") +
+  guides(fill = "none")
+```
+
+## Róźnica w zestawach wyników wyszukiwania: tryb normalny vs. tryb prywatny przeglądarki
+
+Różnica wyrażona jest w liczbach całkowitych 0 - 5. Zero oznacza, że wyniki były identyczne. Róźnica > 0 oznacza, że wystąpiły różnice. 
+
+Różnicę obliczyliśmy metodą optimal string alignment distance (dalej: OSA) https://journal.r-project.org/archive/2014-1/loo.pdf [mendeley]
+Metoda ta daje wyniki identyczne [przyp dolny] z metodą zastosowaną w badaniu DuckDuckGo [mendeley].
+
+Do obliczenia OSA każdy ZWW jest traktowany jako ciąg pięciu znaków (por. tabela 1, wykres 2). Brane są pod uwagę cztery scenariusze różnic między ZWW jako ciągami znaków:
+
+- Substytucja (substitution of a character), np. ‘foo’→‘boo’.
+- Usunięcie (deletion of a character), np. ‘foo’→‘oo’.
+- Umieszczenie (insertion of a character), np. ‘foo’→‘floo’.
+- Transpozycja (transposition of two adjacent characters), as in ‘foo’→‘ofo’.
+
+z których każdy ma wagę 1. 
+Naszym zdaniem w kontekście wyszukiwania informacji w internecie scenariusz, w którym pomiędzy ZWW występuje tylko transpozycja, różni się jakościowo od pozostałych. Choć kolejność wyników wyszukiwania ma znaczenie dla ich klikalności, to gdy wynik nie pojawi się w ogóle, użytkownik na pewno na niego nie kliknie. Zatem za pomocą przeszukania możliwych permutacji sprawdziliśmy, czy ZWW uzyskany w trybie prywatnym składa się z tych samych znaków (czyli domen), co w trybie normalnym. 
+**Uczestnicy badania najczęściej  (29 z 73) zobaczyli ten sam ZWW (OSA = 0) w obu trybach przeglądarki** (wykres 3). Mediana OSA = 1, Q1 = 0, Q3 = 2, średnia = 1,356. **Jeszcze częściej ZWW w trybie prywatnym był tylko permutacją ZWW w trybie normalnym (36 z 73 osób)**.
+
+```{r osasummary, include=FALSE, echo=FALSE}
+summary(df_md$dist_osa)
+table(df_md$dist_osa)
+table(df_md$is_incognito_permutation_of_normal)
+table(df$dist_osa, df_md$is_incognito_permutation_of_normal)
+```
+```{r osadistrib, echo=FALSE}
+ggplot(df_md) +
+  geom_bar(aes(x = ordered(dist_osa), fill = is_incognito_permutation_of_normal)) +
+  labs(x = 'OSA',
+       y = 'Liczebność [ilość uczestników,\nktóra uzyskała OSA, n = 73]',
+       title = 'Róźnica w ZWW: tryb normalny vs. tryb prywatny przeglądarki',
+       subtitle = "obliczono metodą OSA",
+       caption = "Źródło: badania własne") +
+  scale_fill_discrete(name = "Czy ZWW\nw trybie prywatnym\njest tylko permutacją ZWW\nw trybie normalnym?",
+                      labels = c("nie", "tak"))
+```
+
+Dalej testy.
+
+interpretacja w:
+
+dla mniej spersonalizowanych zestawów wyników wyszukiwania (które pojawiły się więcej niż dwojgu respondentów), mediana dist_osa była niższa, niż dla bardziej spersonalizowanych wyników wyszukiwania (które pojawiły się tylko pojedynczym respondentom lub dwojgu respondentów)
