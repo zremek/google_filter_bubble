@@ -3,8 +3,8 @@ title: "filter_bubble_paper_results"
 author: "Remigiusz Żulicki"
 date: "29 10 2019"
 output:
-  html_document: default
   word_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -19,6 +19,7 @@ df_long_md <- read_csv("df_long_final.csv")
 Osoby uczestniczące w naszym badaniu zostały poproszone o podanie dokładnego adresu url dla pięciu pierwszych wyników wyszukiwania hasła "Paweł Adamowicz" w wyszukiwarce Google. Zebraliśmy po pięć pierwszych wyników dla trybu normalnego (przy zalogowaniu na konto Google) i prywatnego przeglądarki internetowej. Uzyskaliśmy odpowiedzi od 105 osób, jednak po wyczyszczeniu tekstów, wprowadzonych jako adresy url, pozostawiliśmy odpowiedzi 73 osób [wyjaśnić w przyp. dolnym]. Zatem łącznie przeanalizowaliśmy 730 adresów url - po 10 dla jednego uczestnika. Każdy adres url skróciliśmy do domeny głównej. Każdej domenie przypisaliśmy znak (literę albo cyfrę), na potrzebę obliczenia różnicy między zestawami wyników wyszukiwania. Łącznie w obu trybach wyszukiwania uczestnicy naszego badania uzyskali 28 różnych domen (tabela 1).
 
 ```{r domaintbl, echo=FALSE}
+
 knitr::kable(df_long_md %>% 
   group_by(url_top_domain, letter_top_domain) %>% 
   count() %>% 
@@ -31,7 +32,7 @@ knitr::kable(df_long_md %>%
 
 Domeny te ułożone były w różnej kolejności, od pierwszej do piątej pozycji na liście wyników wyszukiwania. W podziale na tryb przeglądarki różnice w kolejności były niewielkie dla najczęściej pojawiających się domen (pierwsza pozycja - pl.wikipedia.org; druga - www.facebook.com; trzecia - www.wprost.pl). Niektóre domeny (www.gdansk.pl; trojmiasto.onet.pl; wiadomosci.onet.pl) pojawiły się tylko w trybie normalnym przeglądarki, inne (tysol.pl; www.rp.pl) tylko w trybie prywatnym (wykres 1).
 
-```{r domain_ord_mode_count, echo=FALSE, fig.height=14, fig.width=8}
+```{r domain_ord_mode_count, echo=FALSE, fig.height=10, fig.width=8}
 df_long_md <- df_long_md %>% 
   mutate(browser_mode = factor(browser_mode)) %>%
   mutate(browser_mode = forcats::fct_recode(
@@ -113,7 +114,7 @@ table(df_md$dist_osa)
 table(df_md$is_incognito_permutation_of_normal)
 table(df_md$dist_osa, df_md$is_incognito_permutation_of_normal)
 ```
-```{r osadistrib, echo=FALSE}
+```{r osadistrib, echo=FALSE, fig.height=8, fig.width=8}
 ggplot(df_md) +
   geom_bar(aes(x = ordered(dist_osa), fill = is_incognito_permutation_of_normal)) +
   labs(x = 'OSA',
@@ -129,15 +130,19 @@ ggplot(df_md) +
 ## Testowanie hipotez
 
 Na etapie projektowania badania postawiliśmy robocze hipotezy, że wynik OSA mogą różnicować zmienne:
+
 - rok urodzenia osoby uczestniczącej w badaniu
 - płeć
 - rodzaj studiów 
 - umiejętność korzystania z trybu prywatnego przeglądarki
 - światopogląd w wymiarze liberalizm/konserwatyzm
 - nastawienie do kontroli prywatności użytkownika internetu
+
 Z uwagi na specyfikę realizacji badania sprawdziliśmy także, czy wynik OSA różnicował czas odpowiedzi:
+
 - miesiąc i dzień
 - miesiąc.
+
 We wszystkich wyżej wymienionych przypadkach różnice były nieistotne statystycznie.
 
 W toku analizy postawiliśmy zatem kolejną hipotezę, że wyniki OSA może róznicować stopień personalizacji ZWW w trybie normalnym.
@@ -162,7 +167,7 @@ rFromWilcox(w, dim(df_md)[1])
 
 Różnicę tę przedstawiamy na wykresie 4.
 
-```{r dist_osa_by_normal_count_plot, echo=FALSE}
+```{r dist_osa_by_normal_count_plot, echo=FALSE, fig.width=8}
 ggplot(df_md, aes(x = normal_count > 2, y = dist_osa)) + 
   geom_boxplot() +
   geom_dotplot(binaxis = "y", stackdir = "center",
