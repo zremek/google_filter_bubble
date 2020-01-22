@@ -23,7 +23,7 @@ df_long_md <- df_long_md %>%
   mutate(browser_mode = forcats::fct_recode(
     .f = browser_mode,
     `normal search` = "normal",
-    `incognito search` = "incognito"))
+    `private search` = "incognito"))
 
 ggplot(df_long_md, aes(x = fct_rev(fct_infreq(url_top_domain)),
                        fill = ordered(search_order_short))) +
@@ -57,7 +57,7 @@ knitr::kable(
 ## SSR distribution vs browser mode
 
 50 SSRs in normal mode - 37 of 73 participants saw a unique SSR
-51 SSRs in incognito mode - 38 of 73 participants saw a unique SSR
+51 SSRs in private mode - 38 of 73 participants saw a unique SSR
 
 **More than a half of participants saw a unique set of results**
 
@@ -67,7 +67,7 @@ df_md %>% gather(incognito, normal, key = "browser_mode", value = "search_res") 
   mutate(browser_mode = forcats::fct_recode(
     .f = browser_mode,
     `normal search` = "normal",
-    `incognito search` = "incognito")) %>% 
+    `private search` = "incognito")) %>% 
   ggplot(aes(x = search_res %>% fct_infreq() %>% fct_rev(), fill = browser_mode)) + 
   geom_bar(position = "dodge") +
   facet_grid(col = vars(browser_mode)) +
@@ -91,7 +91,7 @@ Each of weight 1.
 
 In out case OSA must be an integer, between 0 (no difference) and 5
 
-**29 of 73 participants saw the same SSR (OSA = 0) in both private and incognito search. Even more - 36 of 73 - saw just a permutation**.
+**29 of 73 participants saw the same SSR (OSA = 0) using normal and private search. Even more - 36 of 73 - saw just a permutation**.
 
 ```{r osasummary, include=FALSE, echo=FALSE}
 summary(df_md$dist_osa)
