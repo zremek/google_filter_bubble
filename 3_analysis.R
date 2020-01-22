@@ -317,7 +317,7 @@ df$month <- lubridate::month(df$`Sygnatura czasowa`)
 kruskal.test(dist_osa ~ month_day, df)
 kruskal.test(dist_osa ~ month, df)
 wilcox.test(dist_osa ~ month, 
-            data = df, paired=FALSE, exact=FALSE, conf.int=TRUE)
+            data = df, paired = FALSE, exact = FALSE, conf.int = TRUE)
 
 # # export final df to later use
 # write_csv(df, "df_final.csv")
