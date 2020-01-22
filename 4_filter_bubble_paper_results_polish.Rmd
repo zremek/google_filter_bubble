@@ -183,3 +183,4 @@ ggplot(df_md, aes(x = normal_count > 2, y = dist_osa)) +
   guides(fill = "none", colour = "none") +
   scale_x_discrete(labels = c("nie", "tak"))
 ```
+Artykuł zostanie opublikowany w czasopiśmie Zarządzanie Mediami http://www.ejournals.eu/ZM/

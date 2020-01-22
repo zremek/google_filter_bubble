@@ -1,0 +1,6 @@
+---
+title: "Bobcatsss 2020 summary"
+author: "Remigiusz Żulicki, Michał Żytomirski"
+date: "22 01 2020"
+output: rmarkdown::github_document
+---
