@@ -83,9 +83,10 @@ df_md %>% gather(incognito, normal, key = "browser_mode", value = "search_res") 
 Optimal string alignment distance(OSA) adapted from Mark P.J. van der Loo https://journal.r-project.org/archive/2014-1/loo.pdf 
 
 - substitution of a character: ‘foo’→‘boo’.
+- transposition of two adjacent characters: ‘foo’→‘ofo’.
 - deletion of a character: ‘foo’→‘oo’.
 - insertion of a character: ‘foo’→‘floo’.
-- transposition of two adjacent characters: ‘foo’→‘ofo’.
+
 
 Each of weight 1.
 
@@ -109,6 +110,8 @@ ggplot(df_md) +
                       labels = c("No", "Yes")) +
   theme(legend.position = "bottom")
 ```
+
+*Median* OSA = 1, *Q1* = 0, *Q3* = 2, *Mean* = 1.356
 
 ## In search for independent variables
 

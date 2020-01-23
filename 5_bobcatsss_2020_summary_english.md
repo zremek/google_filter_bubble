@@ -29,7 +29,7 @@ Source: own research
 ## SSR distribution vs browser mode
 
 50 SSRs in normal mode - 37 of 73 participants saw a unique SSR 51 SSRs
-in incognito mode - 38 of 73 participants saw a unique SSR
+in private mode - 38 of 73 participants saw a unique SSR
 
 **More than a half of participants saw a unique set of results**
 
@@ -41,18 +41,20 @@ Optimal string alignment distance(OSA) adapted from Mark P.J. van der
 Loo <https://journal.r-project.org/archive/2014-1/loo.pdf>
 
   - substitution of a character: ‘foo’→‘boo’.
+  - transposition of two adjacent characters: ‘foo’→‘ofo’.
   - deletion of a character: ‘foo’→‘oo’.
   - insertion of a character: ‘foo’→‘floo’.
-  - transposition of two adjacent characters: ‘foo’→‘ofo’.
 
 Each of weight 1.
 
 In out case OSA must be an integer, between 0 (no difference) and 5
 
-**29 of 73 participants saw the same SSR (OSA = 0) in both private and
-incognito search. Even more - 36 of 73 - saw just a permutation**.
+**29 of 73 participants saw the same SSR (OSA = 0) using normal and
+private search. Even more - 36 of 73 - saw just a permutation**.
 
 ![](5_bobcatsss_2020_summary_english_files/figure-gfm/osadistrib-1.png)<!-- -->
+
+*Median* OSA = 1, *Q1* = 0, *Q3* = 2, *Mean* = 1.356
 
 ## In search for independent variables
 
