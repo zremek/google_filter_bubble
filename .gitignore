@@ -8,5 +8,6 @@ surv_20190513.csv
 df_final.csv
 df_long_final.csv
 notes.txt
+*.Rmd
 *.html
 *.docx

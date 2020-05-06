@@ -1,0 +1,136 @@
+---
+title: "Bobcatsss 2020 summary"
+author: "Remigiusz Żulicki, Michał Żytomirski"
+date: "22 01 2020"
+output: rmarkdown::github_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+df_md <- read_csv("df_final.csv")
+df_long_md <- read_csv("df_long_final.csv")
+```
+
+## Distribution of domains vs order in set of search results vs browser mode
+
+28 unique domains
+
+```{r domain_ord_mode_count, echo=FALSE, fig.height=10, fig.width=8}
+df_long_md <- df_long_md %>% 
+  mutate(browser_mode = factor(browser_mode)) %>%
+  mutate(browser_mode = forcats::fct_recode(
+    .f = browser_mode,
+    `normal search` = "normal",
+    `private search` = "incognito"))
+
+ggplot(df_long_md, aes(x = fct_rev(fct_infreq(url_top_domain)),
+                       fill = ordered(search_order_short))) +
+  geom_bar() + facet_grid(rows = vars(browser_mode)) +
+  coord_flip() +
+  labs(x = 'Top domain',
+       y = 'Url count [n = 730]',
+       caption = "Source: own research") +
+  scale_fill_ordinal(name = "Order in set of search results") +
+  theme(legend.position = "bottom")
+```
+
+## What is a set of search results (SSR)?
+
+First five organic Google search results (top domains!) encoded as single characters
+
+Most common example:
+
+```{r ivl3o, echo=FALSE}
+knitr::kable(
+  df_long_md %>% 
+               filter(letter_top_domain %in% c("I", "V", "B", "3", "1")) %>% 
+    select(letter_top_domain, url_top_domain) %>% 
+    distinct() %>% 
+    rename(`Top domain` = "url_top_domain",
+         `Single character encoding` = "letter_top_domain"),
+  caption = "Source: own research")
+  
+```
+
+## SSR distribution vs browser mode
+
+50 SSRs in normal mode - 37 of 73 participants saw a unique SSR
+51 SSRs in private mode - 38 of 73 participants saw a unique SSR
+
+**More than a half of participants saw a unique set of results**
+
+```{r search_res_mode_count, echo=FALSE, fig.height=10, fig.width=8}
+df_md %>% gather(incognito, normal, key = "browser_mode", value = "search_res") %>%
+  mutate(browser_mode = factor(browser_mode)) %>%
+  mutate(browser_mode = forcats::fct_recode(
+    .f = browser_mode,
+    `normal search` = "normal",
+    `private search` = "incognito")) %>% 
+  ggplot(aes(x = search_res %>% fct_infreq() %>% fct_rev(), fill = browser_mode)) + 
+  geom_bar(position = "dodge") +
+  facet_grid(col = vars(browser_mode)) +
+  coord_flip() +
+  labs(x = 'Set of search results (SSR)',
+       y = 'Participant count [n = 73]',
+       caption = "Source: own research") +
+  guides(fill = "none")
+```
+
+## Measuring difference between normal and private search
+
+Optimal string alignment distance(OSA) adapted from Mark P.J. van der Loo https://journal.r-project.org/archive/2014-1/loo.pdf 
+
+- substitution of a character: ‘foo’→‘boo’.
+- transposition of two adjacent characters: ‘foo’→‘ofo’.
+- deletion of a character: ‘foo’→‘oo’.
+- insertion of a character: ‘foo’→‘floo’.
+
+
+Each of weight 1.
+
+In out case OSA must be an integer, between 0 (no difference) and 5
+
+**29 of 73 participants saw the same SSR (OSA = 0) using normal and private search. Even more - 36 of 73 - saw just a permutation**.
+
+```{r osasummary, include=FALSE, echo=FALSE}
+summary(df_md$dist_osa)
+table(df_md$dist_osa)
+table(df_md$is_incognito_permutation_of_normal)
+table(df_md$dist_osa, df_md$is_incognito_permutation_of_normal)
+```
+```{r osadistrib, echo=FALSE, fig.height=8, fig.width=8}
+ggplot(df_md) +
+  geom_bar(aes(x = ordered(dist_osa), fill = is_incognito_permutation_of_normal)) +
+  labs(x = 'OSA - normal vs private search',
+       y = 'Participant count [n = 73]',
+       caption = "Source: own research") +
+  scale_fill_discrete(name = "Were the difference just a permutation?",
+                      labels = c("No", "Yes")) +
+  theme(legend.position = "bottom")
+```
+
+*Median* OSA = 1, *Q1* = 0, *Q3* = 2, *Mean* = 1.356
+
+## In search for independent variables
+
+**The difference (OSA distance) between normal and private search was lower for participant with less personalized search result sets in normal search**
+
+```{r dist_osa_by_normal_count_plot, echo=FALSE, fig.width=8}
+ggplot(df_md, aes(x = normal_count > 2, y = dist_osa)) + 
+  geom_boxplot() +
+  geom_dotplot(binaxis = "y", stackdir = "center",
+               binwidth = 1/5,
+               alpha = 3/4,
+               aes(fill = ordered(dist_osa),
+                   colour = ordered(dist_osa))) +
+  labs(x = "SSR in normal search > 2",
+       y = 'OSA',
+       subtitle = "Less personalized SSR means that more than 2 participants saw it",
+       caption = "Source: own research") +
+  guides(fill = "none", colour = "none") +
+  scale_x_discrete(labels = c("No", "Yes"))
+```
+
+*W* = 697.5, *p* < 0.05, *r* = -0.252 (*effect size* small to medium).
