@@ -44,7 +44,7 @@ ggplot(df_long_md, aes(x = fct_rev(fct_infreq(url_top_domain)),
   geom_bar() + facet_grid(rows = vars(browser_mode)) +
   coord_flip() +
   labs(x = 'Domena główna',
-       y = 'Liczebność [łączna ilość wystąpień domeny, n = 730]',
+       y = 'Liczebność [łączna liczba wystąpień domeny, n = 730]',
        title = 'Rozkład domen głównych w podziale na kolejność na liście\nwyników wyszukiwania i tryb przeglądarki',
        caption = "Źródło: badania własne") +
   scale_fill_ordinal(name = "Kolejność na liście\nwyników wyszukiwania") +
@@ -83,7 +83,7 @@ df_md %>% gather(incognito, normal, key = "browser_mode", value = "search_res") 
   facet_grid(col = vars(browser_mode)) +
   coord_flip() +
   labs(x = 'Zestaw wyników wyszukiwania (ZWW)',
-       y = 'Liczebność [ilość uczestników, która uzyskała ZWW, n = 73]',
+       y = 'Liczebność [liczba uczestników, która uzyskała ZWW, n = 73]',
        title = 'Rozkład ZWW w podziale na tryb przeglądarki',
        caption = "Źródło: badania własne") +
   guides(fill = "none")
@@ -117,7 +117,7 @@ table(df_md$dist_osa, df_md$is_incognito_permutation_of_normal)
 ggplot(df_md) +
   geom_bar(aes(x = ordered(dist_osa), fill = is_incognito_permutation_of_normal)) +
   labs(x = 'OSA',
-       y = 'Liczebność [ilość uczestników,\nktóra uzyskała OSA, n = 73]',
+       y = 'Liczebność [liczba uczestników,\nktóra uzyskała OSA, n = 73]',
        title = 'Róźnica w ZWW: tryb normalny vs. tryb prywatny przeglądarki',
        subtitle = "obliczono metodą OSA",
        caption = "Źródło: badania własne") +
